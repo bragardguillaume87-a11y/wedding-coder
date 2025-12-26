@@ -1,155 +1,133 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { useUser } from "@/lib/useUser";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-export default function Dashboard() {
-  const { user, loading } = useUser();
+export default function DashboardPage() {
   const router = useRouter();
-interface Event {
-  id: string;
-  event_name: string;
-  description?: string;
-  event_date: string;
-  department_name?: string;
-  city_name?: string;
-  budget_per_person?: number;
-  status?: string;
-}
-
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Récupère l'email depuis le localStorage (simple pour le moment)
+    // TODO: Remplacer par une vraie gestion de session avec Supabase
+    const email = localStorage.getItem("userEmail");
+    
+    if (!email) {
+      // Si pas d'email stocké, redirige vers la page de connexion
       router.push("/");
+    } else {
+      setUserEmail(email);
+      setLoading(false);
     }
-  }, [user, loading, router]);
+  }, [router]);
 
-  useEffect(() => {
-    if (user) {
-      fetchEvents();
-    }
-  }, [user]);
-
-  const fetchEvents = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("local_events")
-        .select("*")
-        .order("event_date", { ascending: true });
-
-      if (error) throw error;
-      setEvents(data || []);
-    } catch (error) {
-      console.error("Erreur:", error);
-    } finally {
-      setLoadingEvents(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
+    localStorage.removeItem("userEmail");
     router.push("/");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <p className="text-xl">⏳ Chargement...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-2xl font-semibold text-indigo-900">⏳ Chargement...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-indigo-900">
-            💍 Wedding-Coder
-          </h1>
-          <div className="flex gap-4 items-center">
-            <span className="text-sm text-gray-600">{user?.email}</span>
-            <button
-              onClick={() => router.push("/dashboard/create-event")}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
-            >
-              ➕ Créer un événement
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-xl p-8 mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-4xl font-bold text-indigo-900 mb-2">
+                💍 Wedding-Coder Dashboard
+              </h1>
+              <p className="text-gray-600">
+                Bienvenue, <span className="font-semibold">{userEmail}</span>
+              </p>
+            </div>
             <button
               onClick={handleLogout}
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
             >
-              Déconnexion
+              🚪 Déconnexion
             </button>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">
-          Événements locaux
-        </h2>
-
-        {loadingEvents ? (
-          <p className="text-center text-gray-600">⏳ Chargement des événements...</p>
-        ) : events.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
-            <p className="text-gray-600 mb-4">
-              Aucun événement créé pour le moment.
-            </p>
-            <button
-              onClick={() => router.push("/dashboard/create-event")}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition"
-            >
-              Créer le premier événement
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <div
-                key={event.id}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer"
-                onClick={() => router.push(`/dashboard/event/${event.id}`)}
-              >
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {event.event_name}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  {event.description?.substring(0, 100)}...
-                </p>
-                <div className="space-y-2 text-sm">
-                  <p className="text-gray-700">
-                    📅 {new Date(event.event_date).toLocaleDateString("fr-FR")}
-                  </p>
-                  <p className="text-gray-700">
-                    📍 {event.department_name || event.city_name}
-                  </p>
-                  {event.budget_per_person && (
-                    <p className="text-gray-700">
-                      💰 {event.budget_per_person}€/personne
-                    </p>
-                  )}
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                      event.status === "confirmed"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {event.status === "confirmed" ? "Confirmé" : "En planning"}
-                  </span>
-                </div>
+        {/* Navigation Cards */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Profil Card */}
+          <Link href="/profile">
+            <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-indigo-500">
+              <div className="text-5xl mb-4">👤</div>
+              <h2 className="text-2xl font-bold text-indigo-900 mb-2">
+                Mon Profil
+              </h2>
+              <p className="text-gray-600">
+                Voir et modifier mes informations personnelles
+              </p>
+              <div className="mt-4 text-indigo-600 font-semibold">
+                Accéder →
               </div>
-            ))}
+            </div>
+          </Link>
+
+          {/* Événements Card (à venir) */}
+          <div className="bg-gray-100 rounded-lg shadow-lg p-6 opacity-50 cursor-not-allowed">
+            <div className="text-5xl mb-4">📅</div>
+            <h2 className="text-2xl font-bold text-gray-600 mb-2">
+              Mes Événements
+            </h2>
+            <p className="text-gray-500">
+              Gérer mes événements de mariage
+            </p>
+            <div className="mt-4 text-gray-500 font-semibold">
+              Prochainement...
+            </div>
           </div>
-        )}
-      </main>
+
+          {/* Invitations Card (à venir) */}
+          <div className="bg-gray-100 rounded-lg shadow-lg p-6 opacity-50 cursor-not-allowed">
+            <div className="text-5xl mb-4">✉️</div>
+            <h2 className="text-2xl font-bold text-gray-600 mb-2">
+              Invitations
+            </h2>
+            <p className="text-gray-500">
+              Créer et envoyer des invitations
+            </p>
+            <div className="mt-4 text-gray-500 font-semibold">
+              Prochainement...
+            </div>
+          </div>
+
+          {/* Carte Interactive Card (à venir) */}
+          <div className="bg-gray-100 rounded-lg shadow-lg p-6 opacity-50 cursor-not-allowed">
+            <div className="text-5xl mb-4">🗺️</div>
+            <h2 className="text-2xl font-bold text-gray-600 mb-2">
+              Carte Interactive
+            </h2>
+            <p className="text-gray-500">
+              Visualiser les lieux du mariage
+            </p>
+            <div className="mt-4 text-gray-500 font-semibold">
+              Prochainement...
+            </div>
+          </div>
+        </div>
+
+        {/* Info Box */}
+        <div className="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+          <p className="text-blue-800">
+            <strong>🎯 Note :</strong> Cette page dashboard évoluera avec de nouvelles fonctionnalités.
+            Pour l'instant, tu peux accéder à ton profil pour tester les RLS policies !
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
