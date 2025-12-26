@@ -1,53 +1,87 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function SignupPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isLogin, setIsLogin] = useState(true);
 
-  const handleAuth = async (e) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
     try {
-      if (isLogin) {
-        // Login
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) {
-          setMessage(`Erreur: ${error.message}`);
-        } else {
-          window.location.href = "/dashboard";
-        }
-      } else {
-        // Signup
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (error) {
-          setMessage(`Erreur: ${error.message}`);
-        } else {
-          setMessage("✅ Inscription réussie ! Vérifiez votre email.");
-        }
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, full_name: fullName }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(`❌ Erreur: ${data.error}`);
+        return;
       }
+
+      setMessage("✅ Inscription réussie! Redirection...");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
     } catch (error) {
-      setMessage(`Erreur: ${error.message}`);
+      setMessage(`❌ Erreur: ${(error as Error).message}`);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage(`❌ Erreur: ${data.error}`);
+        return;
+      }
+
+      setMessage("✅ Connexion réussie!");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1500);
+    } catch (error) {
+      setMessage(`❌ Erreur: ${(error as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    if (isLogin) {
+      handleLogin(e);
+    } else {
+      handleSignup(e);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
         <h1 className="text-4xl font-bold text-center mb-2 text-indigo-900">
           💍 Wedding-Coder
@@ -56,7 +90,7 @@ export default function Home() {
           Plateforme de mariage itinérant collaborative
         </p>
 
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">Email</label>
             <input
@@ -64,7 +98,7 @@ export default function Home() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="ton@email.com"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 bg-white placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
               required
             />
           </div>
@@ -76,10 +110,23 @@ export default function Home() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900 bg-white placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
               required
             />
           </div>
+
+          {!isLogin && (
+            <div>
+              <label className="block text-sm font-medium mb-2">Nom complet</label>
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Guillaume Bragard"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
+              />
+            </div>
+          )}
 
           <button
             type="submit"
@@ -92,12 +139,13 @@ export default function Home() {
 
         <div className="mt-4 text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setMessage("");
+            }}
             className="text-indigo-600 hover:underline text-sm"
           >
-            {isLogin
-              ? "Pas de compte ? S'inscrire"
-              : "Déjà un compte ? Se connecter"}
+            {isLogin ? "Pas de compte ? S'inscrire" : "Déjà un compte ? Se connecter"}
           </button>
         </div>
 
