@@ -31,6 +31,9 @@ export default function SignupPage() {
         return;
       }
 
+      // 💾 Sauvegarde l'email pour la session
+      localStorage.setItem("userEmail", email);
+
       setMessage("✅ Inscription réussie! Redirection...");
       setTimeout(() => {
         router.push("/dashboard");
@@ -60,6 +63,9 @@ export default function SignupPage() {
         setMessage(`❌ Erreur: ${data.error}`);
         return;
       }
+
+      // 💾 Sauvegarde l'email pour la session
+      localStorage.setItem("userEmail", email);
 
       setMessage("✅ Connexion réussie!");
       setTimeout(() => {
