@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -10,13 +11,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Récupère l'email depuis le localStorage (simple pour le moment)
-    // TODO: Remplacer par une vraie gestion de session avec Supabase
     const email = localStorage.getItem("userEmail");
-    
+
     if (!email) {
-      // Si pas d'email stocké, redirige vers la page de connexion
-      router.push("/");
+      router.push("/login");
     } else {
       setUserEmail(email);
       setLoading(false);
@@ -30,103 +28,197 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-2xl font-semibold text-indigo-900">⏳ Chargement...</div>
+      <div className="min-h-screen bg-gradient-to-br from-[var(--cream)] to-white flex items-center justify-center">
+        <div className="text-2xl font-semibold text-[var(--charcoal)]">⏳ Chargement...</div>
       </div>
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 },
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--cream)] to-white p-8">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-xl p-8 mb-6">
-          <div className="flex justify-between items-center">
+        <motion.div
+          className="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-[var(--beige)]"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h1 className="text-4xl font-bold text-indigo-900 mb-2">
-                💍 Wedding-Coder Dashboard
-              </h1>
-              <p className="text-gray-600">
-                Bienvenue, <span className="font-semibold">{userEmail}</span>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-5xl">💍</span>
+                <h1 className="text-4xl font-bold text-[var(--charcoal)]" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                  Votre Espace Mariage
+                </h1>
+              </div>
+              <p className="text-[var(--charcoal)] opacity-70 ml-16">
+                Bienvenue, <span className="font-semibold text-[var(--terracotta)]">{userEmail}</span>
               </p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-            >
-              🚪 Déconnexion
-            </button>
+            <div className="flex gap-3">
+              <Link href="/">
+                <button className="px-6 py-2 border-2 border-[var(--beige)] text-[var(--charcoal)] rounded-lg hover:border-[var(--terracotta)] hover:text-[var(--terracotta)] transition">
+                  🏠 Accueil
+                </button>
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-lg hover:shadow-lg transition"
+              >
+                🚪 Déconnexion
+              </button>
+            </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Navigation Cards */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <motion.div
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {/* Profil Card */}
-          <Link href="/profile">
-            <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-indigo-500">
-              <div className="text-5xl mb-4">👤</div>
-              <h2 className="text-2xl font-bold text-indigo-900 mb-2">
-                Mon Profil
+          <motion.div variants={itemVariants}>
+            <Link href="/profile">
+              <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all cursor-pointer border-2 border-[var(--beige)] hover:border-[var(--terracotta)] h-full">
+                <div className="text-5xl mb-4">👤</div>
+                <h2 className="text-2xl font-bold text-[var(--charcoal)] mb-2" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                  Mon Profil
+                </h2>
+                <p className="text-[var(--charcoal)] opacity-70 mb-4">
+                  Gérer mes informations personnelles
+                </p>
+                <div className="text-[var(--terracotta)] font-semibold">
+                  Accéder →
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Notre Mariage Card */}
+          <motion.div variants={itemVariants}>
+            <Link href="/dashboard/create-event">
+              <div className="bg-gradient-to-br from-[var(--rose-powder)] to-[var(--gold)] bg-opacity-20 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all cursor-pointer border-2 border-[var(--terracotta)] h-full">
+                <div className="text-5xl mb-4">💝</div>
+                <h2 className="text-2xl font-bold text-[var(--charcoal)] mb-2" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                  Notre Mariage
+                </h2>
+                <p className="text-[var(--charcoal)] opacity-80 mb-4">
+                  Créer et gérer notre événement
+                </p>
+                <div className="text-[var(--terracotta)] font-semibold">
+                  Créer l&apos;événement →
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Carte du Parcours Card - NOUVEAU ! */}
+          <motion.div variants={itemVariants}>
+            <Link href="/dashboard/journey-map">
+              <div className="bg-gradient-to-br from-[var(--gold)] to-[var(--honey)] bg-opacity-20 rounded-xl shadow-lg p-6 hover:shadow-2xl transition-all cursor-pointer border-2 border-[var(--gold)] h-full">
+                <div className="text-5xl mb-4">🗺️</div>
+                <h2 className="text-2xl font-bold text-[var(--charcoal)] mb-2" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                  Carte du Parcours
+                </h2>
+                <p className="text-[var(--charcoal)] opacity-80 mb-4">
+                  Visualisez toutes les étapes de votre voyage sur une carte interactive
+                </p>
+                <div className="text-[var(--terracotta)] font-semibold">
+                  Voir la carte →
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Invitations Card */}
+          <motion.div variants={itemVariants}>
+            <div className="bg-white rounded-xl shadow-lg p-6 opacity-60 cursor-not-allowed border-2 border-[var(--beige)] h-full">
+              <div className="text-5xl mb-4">✉️</div>
+              <h2 className="text-2xl font-bold text-[var(--charcoal)] opacity-60 mb-2" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                Invitations
               </h2>
-              <p className="text-gray-600">
-                Voir et modifier mes informations personnelles
+              <p className="text-[var(--charcoal)] opacity-50 mb-4">
+                Envoyer des invitations personnalisées
               </p>
-              <div className="mt-4 text-indigo-600 font-semibold">
-                Accéder →
+              <div className="text-[var(--charcoal)] opacity-50 font-semibold">
+                Prochainement...
               </div>
             </div>
-          </Link>
+          </motion.div>
 
-          {/* Événements Card (à venir) */}
-          <div className="bg-gray-100 rounded-lg shadow-lg p-6 opacity-50 cursor-not-allowed">
-            <div className="text-5xl mb-4">📅</div>
-            <h2 className="text-2xl font-bold text-gray-600 mb-2">
-              Mes Événements
-            </h2>
-            <p className="text-gray-500">
-              Gérer mes événements de mariage
-            </p>
-            <div className="mt-4 text-gray-500 font-semibold">
-              Prochainement...
+          {/* Photos Card */}
+          <motion.div variants={itemVariants}>
+            <div className="bg-white rounded-xl shadow-lg p-6 opacity-60 cursor-not-allowed border-2 border-[var(--beige)] h-full">
+              <div className="text-5xl mb-4">📸</div>
+              <h2 className="text-2xl font-bold text-[var(--charcoal)] opacity-60 mb-2" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                Galerie Photos
+              </h2>
+              <p className="text-[var(--charcoal)] opacity-50 mb-4">
+                Partager nos souvenirs
+              </p>
+              <div className="text-[var(--charcoal)] opacity-50 font-semibold">
+                Prochainement...
+              </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Invitations Card (à venir) */}
-          <div className="bg-gray-100 rounded-lg shadow-lg p-6 opacity-50 cursor-not-allowed">
-            <div className="text-5xl mb-4">✉️</div>
-            <h2 className="text-2xl font-bold text-gray-600 mb-2">
-              Invitations
-            </h2>
-            <p className="text-gray-500">
-              Créer et envoyer des invitations
-            </p>
-            <div className="mt-4 text-gray-500 font-semibold">
-              Prochainement...
+          {/* Messages Card */}
+          <motion.div variants={itemVariants}>
+            <div className="bg-white rounded-xl shadow-lg p-6 opacity-60 cursor-not-allowed border-2 border-[var(--beige)] h-full">
+              <div className="text-5xl mb-4">💌</div>
+              <h2 className="text-2xl font-bold text-[var(--charcoal)] opacity-60 mb-2" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                Messages
+              </h2>
+              <p className="text-[var(--charcoal)] opacity-50 mb-4">
+                Recevoir les vœux des invités
+              </p>
+              <div className="text-[var(--charcoal)] opacity-50 font-semibold">
+                Prochainement...
+              </div>
             </div>
-          </div>
-
-          {/* Carte Interactive Card (à venir) */}
-          <div className="bg-gray-100 rounded-lg shadow-lg p-6 opacity-50 cursor-not-allowed">
-            <div className="text-5xl mb-4">🗺️</div>
-            <h2 className="text-2xl font-bold text-gray-600 mb-2">
-              Carte Interactive
-            </h2>
-            <p className="text-gray-500">
-              Visualiser les lieux du mariage
-            </p>
-            <div className="mt-4 text-gray-500 font-semibold">
-              Prochainement...
-            </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Info Box */}
-        <div className="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-          <p className="text-blue-800">
-            <strong>🎯 Note :</strong> Cette page dashboard évoluera avec de nouvelles fonctionnalités.
-            Pour l'instant, tu peux accéder à ton profil pour tester les RLS policies !
+        <motion.div
+          className="mt-8 bg-gradient-to-r from-[var(--rose-powder)] to-[var(--gold)] bg-opacity-20 border-l-4 border-[var(--terracotta)] p-6 rounded-lg"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.6 }}
+        >
+          <p className="text-[var(--charcoal)]">
+            <strong className="text-[var(--terracotta)]" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+              💝 Votre espace personnel
+            </strong>
+            <br />
+            <span className="opacity-80">
+              Ici, vous pouvez gérer tous les aspects de votre mariage itinérant. Commencez par créer votre événement, puis invitez vos proches à faire partie de l&apos;aventure !
+            </span>
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

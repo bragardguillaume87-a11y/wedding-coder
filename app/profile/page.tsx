@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { motion } from "framer-motion";
 
 // Client Supabase côté client (avec anon key)
 const supabase = createClient(
@@ -30,6 +31,15 @@ export default function ProfilePage() {
     loadProfile();
   }, []);
 
+  // Cleanup pour les timeouts
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, []);
+
   const loadProfile = async () => {
     setLoading(true);
     setError("");
@@ -37,7 +47,7 @@ export default function ProfilePage() {
     try {
       // Récupère l'utilisateur connecté depuis le localStorage
       const userEmail = localStorage.getItem("userEmail");
-      
+
       if (!userEmail) {
         router.push("/");
         return;
@@ -49,7 +59,7 @@ export default function ProfilePage() {
         .from("users")
         .select("*")
         .eq("email", userEmail)
-        .single();
+        .limit(1); // on limite à 1 ligne
 
       if (fetchError) {
         console.error("❌ Erreur de chargement:", fetchError);
@@ -57,9 +67,15 @@ export default function ProfilePage() {
         return;
       }
 
-      setProfile(data);
-      setNewName(data.full_name || "");
-      console.log("✅ Profil chargé:", data);
+      if (!data || data.length === 0) {
+        setError("Aucun profil trouvé pour cet utilisateur.");
+        return;
+      }
+
+      const row = data[0];
+      setProfile(row);
+      setNewName(row.full_name || "");
+      console.log("✅ Profil chargé:", row);
     } catch (err: any) {
       console.error("❌ Erreur:", err);
       setError(err.message || "Erreur inconnue");
@@ -95,8 +111,9 @@ export default function ProfilePage() {
       // Recharge le profil pour afficher les nouvelles données
       await loadProfile();
 
-      // Cache le message après 3 secondes
-      setTimeout(() => setMessage(""), 3000);
+      // Cache le message après 3 secondes (avec cleanup automatique via useEffect)
+      const timeoutId = setTimeout(() => setMessage(""), 3000);
+      // Le cleanup sera géré par le useEffect global
     } catch (err: any) {
       console.error("❌ Erreur:", err);
       setError(err.message || "Erreur inconnue");
@@ -110,87 +127,108 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-2xl font-semibold text-indigo-900">⏳ Chargement du profil...</div>
+      <div className="min-h-screen bg-gradient-to-br from-[var(--cream)] to-white flex items-center justify-center">
+        <div className="text-2xl font-semibold text-[var(--charcoal)]">⏳ Chargement du profil...</div>
       </div>
     );
   }
 
   if (error && !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-[var(--cream)] to-white flex items-center justify-center p-4">
+        <motion.div
+          className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full border-2 border-[var(--beige)]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           <div className="text-red-600 text-xl font-bold mb-4">❌ Erreur</div>
-          <p className="text-gray-700 mb-6">{error}</p>
+          <p className="text-[var(--charcoal)] mb-6">{error}</p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
+            className="w-full bg-gradient-to-r from-[var(--terracotta)] to-[var(--rose-powder)] text-white py-2 rounded-lg hover:shadow-lg transition"
           >
             Retour au Dashboard
           </button>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--cream)] to-white p-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <motion.div
+          className="flex justify-between items-center mb-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
           <button
             onClick={() => router.push("/dashboard")}
-            className="text-indigo-600 hover:text-indigo-800 font-semibold"
+            className="text-[var(--terracotta)] hover:text-[var(--charcoal)] font-semibold transition-colors flex items-center gap-2"
           >
-            ← Retour au Dashboard
+            <span>←</span> Retour au Dashboard
           </button>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-sm"
+            className="px-4 py-2 bg-gradient-to-r from-red-400 to-red-500 text-white rounded-lg hover:shadow-lg transition text-sm"
           >
             🚪 Déconnexion
           </button>
-        </div>
+        </motion.div>
 
         {/* Profile Card */}
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h1 className="text-3xl font-bold text-indigo-900 mb-6">
+        <motion.div
+          className="bg-white rounded-2xl shadow-xl p-8 border-2 border-[var(--beige)]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h1 className="text-3xl font-bold text-[var(--charcoal)] mb-6" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
             👤 Mon Profil
           </h1>
 
           {/* Messages */}
           {message && (
-            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-800 rounded">
+            <motion.div
+              className="mb-4 p-3 bg-green-50 border-l-4 border-green-500 text-green-800 rounded"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
               {message}
-            </div>
+            </motion.div>
           )}
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-800 rounded">
+            <motion.div
+              className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-800 rounded"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
           {/* Profile Info */}
           <div className="space-y-6">
             {/* Email (read-only) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--charcoal)] mb-2">
                 Email
               </label>
               <input
                 type="email"
                 value={profile?.email || ""}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                className="w-full px-4 py-2 border-2 border-[var(--beige)] rounded-lg bg-gray-100 text-[var(--charcoal)] cursor-not-allowed"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                🔒 L'email ne peut pas être modifié
+              <p className="text-xs text-[var(--charcoal)] opacity-60 mt-1">
+                🔒 L&apos;email ne peut pas être modifié
               </p>
             </div>
 
             {/* Full Name (editable) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--charcoal)] mb-2">
                 Nom complet
               </label>
               {editing ? (
@@ -200,13 +238,13 @@ export default function ProfilePage() {
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                     placeholder="Votre nom complet"
-                    className="w-full px-4 py-2 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 text-gray-900"
+                    className="w-full px-4 py-2 border-2 border-[var(--terracotta)] rounded-lg focus:outline-none focus:border-[var(--terracotta)] text-[var(--charcoal)]"
                     autoFocus
                   />
                   <div className="flex gap-2">
                     <button
                       onClick={handleSaveProfile}
-                      className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                      className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-2 rounded-lg hover:shadow-lg transition"
                     >
                       ✅ Enregistrer
                     </button>
@@ -215,7 +253,7 @@ export default function ProfilePage() {
                         setEditing(false);
                         setNewName(profile?.full_name || "");
                       }}
-                      className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition"
+                      className="flex-1 border-2 border-[var(--beige)] text-[var(--charcoal)] py-2 rounded-lg hover:border-[var(--terracotta)] transition"
                     >
                       ❌ Annuler
                     </button>
@@ -227,11 +265,11 @@ export default function ProfilePage() {
                     type="text"
                     value={profile?.full_name || "Non renseigné"}
                     disabled
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-900"
+                    className="flex-1 px-4 py-2 border-2 border-[var(--beige)] rounded-lg bg-gray-50 text-[var(--charcoal)]"
                   />
                   <button
                     onClick={() => setEditing(true)}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                    className="px-4 py-2 bg-gradient-to-r from-[var(--terracotta)] to-[var(--rose-powder)] text-white rounded-lg hover:shadow-lg transition"
                   >
                     ✏️ Modifier
                   </button>
@@ -241,47 +279,60 @@ export default function ProfilePage() {
 
             {/* User ID (read-only) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--charcoal)] mb-2">
                 ID Utilisateur
               </label>
               <input
                 type="text"
                 value={profile?.id || ""}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed font-mono text-sm"
+                className="w-full px-4 py-2 border-2 border-[var(--beige)] rounded-lg bg-gray-100 text-[var(--charcoal)] cursor-not-allowed font-mono text-sm"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-[var(--charcoal)] opacity-60 mt-1">
                 🆔 Identifiant unique Supabase
               </p>
             </div>
 
             {/* Created At (read-only) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-[var(--charcoal)] mb-2">
                 Membre depuis
               </label>
               <input
                 type="text"
                 value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString("fr-FR") : ""}
                 disabled
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                className="w-full px-4 py-2 border-2 border-[var(--beige)] rounded-lg bg-gray-100 text-[var(--charcoal)] cursor-not-allowed"
               />
             </div>
           </div>
 
           {/* Info Box */}
-          <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-            <p className="text-blue-800 text-sm">
-              <strong>🔒 Sécurité RLS :</strong> Grâce aux Row Level Security policies,
-              tu ne peux voir et modifier QUE tes propres données. Les autres utilisateurs
-              sont invisibles pour toi !
+          <motion.div
+            className="mt-8 bg-gradient-to-r from-[var(--rose-powder)] to-[var(--gold)] bg-opacity-20 border-l-4 border-[var(--terracotta)] p-4 rounded-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className="text-[var(--charcoal)] text-sm">
+              <strong className="text-[var(--terracotta)]" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
+                🔒 Sécurité RLS :
+              </strong>
+              {' '}Grâce aux Row Level Security policies,
+              vous ne pouvez voir et modifier que vos propres données. Les autres utilisateurs
+              sont invisibles pour vous !
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Debug Info (pour tester les RLS) */}
-        <div className="mt-6 bg-gray-800 text-gray-100 rounded-lg p-6 font-mono text-sm">
-          <h3 className="text-lg font-bold mb-3">🛠️ Debug Info</h3>
+        <motion.div
+          className="mt-6 bg-[var(--charcoal)] text-gray-100 rounded-2xl p-6 font-mono text-sm border-2 border-[var(--beige)]"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-lg font-bold mb-3 text-[var(--gold)]">🛠️ Debug Info</h3>
           <pre className="overflow-x-auto">
             {JSON.stringify(
               {
@@ -294,7 +345,7 @@ export default function ProfilePage() {
               2
             )}
           </pre>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

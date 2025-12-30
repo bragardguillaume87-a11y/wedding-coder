@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm run dev:*)",
+      "Bash(grep:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(node --version:*)",
+      "Bash(npm:*)",
+      "Bash(tasklist:*)",
+      "Bash(dir:*)",
+      "Bash(supabase --version:*)",
+      "Bash(test -f .env.local:*)",
+      "Bash(node -e:*)",
+      "Bash(node scripts/insert-demo-events-simple.js:*)",
+      "Bash(node scripts/fix-foreign-key-and-insert.js:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

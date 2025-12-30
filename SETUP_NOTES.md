@@ -1,6 +1,31 @@
-# Wedding-Coder Setup Notes - 25 Dec 2025
+# Wedding-Coder Setup Notes
 
-## ✅ Complété
+## 📅 27 Décembre 2025 - Mise à Jour
+
+### ✅ Complété Récemment
+
+- **Thème wedding** appliqué à toutes les pages (terracotta, rose, or, crème)
+- **Page Profile** refonte complète avec nouveau thème + Framer Motion
+- **Page Create-Event** refonte complète avec nouveau thème + animations
+- **Plan carte interactive** finalisé et documenté dans `JOURNEY_MAP_PLAN.md`
+- **Font Crimson Pro** ajoutée pour les titres (serif élégant)
+- Toutes les pages utilisent maintenant la palette chaleureuse
+
+### 📋 Plan Carte Interactive Créé
+
+Voir **`JOURNEY_MAP_PLAN.md`** pour le plan complet:
+
+- **SVG Illustration Isométrique** (Landing Page - Publique) - 6-8 points fictifs conceptuels
+- **Carte Leaflet Interactive** (Dashboard - Authentifiée) - Données réelles géocodées
+- Estimation: 10-11h d'implémentation
+- Toutes les ressources et tutoriels listés
+
+---
+
+## 📅 25 Décembre 2025 - Configuration Initiale
+
+### ✅ Complété
+
 - Next.js 15 installé et fonctionnel
 - Supabase intégré (authentification)
 - Page Login/Signup créée et testée
