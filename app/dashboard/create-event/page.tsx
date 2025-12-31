@@ -8,7 +8,7 @@ import { geocodeAddress, delay } from "@/lib/geocoding";
 
 export default function CreateEvent() {
   const router = useRouter();
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [_userEmail, setUserEmail] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -80,7 +80,6 @@ export default function CreateEvent() {
 
       if (result) {
         setCoords({ lat: result.latitude, lng: result.longitude });
-        console.log('✅ Adresse géocodée:', result.display_name);
       } else {
         setGeocodingError("Adresse introuvable. Vérifiez l'orthographe.");
         setCoords(null);

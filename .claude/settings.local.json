@@ -17,7 +17,17 @@
       "Bash(node scripts/insert-demo-events-simple.js:*)",
       "Bash(node scripts/fix-foreign-key-and-insert.js:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(npx tsc:*)",
+      "Bash(timeout /t 15 /nobreak)",
+      "Bash(taskkill:*)",
+      "Bash(npx next info:*)",
+      "Bash(ls:*)",
+      "Bash(start \"\" \"C:\\\\Users\\\\Guillaume\\\\Documents\\\\wedding-coder\\\\.next\\\\analyze\\\\client.html\")",
+      "Bash(if exist nul del nul)"
     ]
   }
 }

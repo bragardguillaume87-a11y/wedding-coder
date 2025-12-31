@@ -1,5 +1,5 @@
 /**
- * Helpers et utilitaires pour la carte Leaflet
+ * Helpers et utilitaires pour la carte
  * Gère le tri, le groupement, et les calculs géographiques
  */
 
@@ -7,6 +7,7 @@ export interface MapEvent {
   id: string;
   event_name: string;
   event_date: string;
+  event_type?: string; // Type d'événement: ceremony, cocktail, dinner, brunch, party, activity
   location_address: string;
   city_name: string;
   latitude: number;
@@ -109,8 +110,8 @@ export function calculateTotalDistance(events: MapEvent[]): number {
 /** Centre géographique de la France */
 export const FRANCE_CENTER: [number, number] = [46.603354, 1.888334];
 
-/** Zoom par défaut pour afficher toute la France */
-export const DEFAULT_ZOOM = 6;
+/** Zoom par défaut pour afficher toute la France et pays voisins */
+export const DEFAULT_ZOOM = 4.5;
 
 /** Couleur terracotta du thème wedding */
 export const MARKER_COLOR = '#E07A5F';

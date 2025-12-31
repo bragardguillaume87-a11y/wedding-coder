@@ -11,14 +11,21 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Vérifier l'auth et rediriger si nécessaire
     const email = localStorage.getItem("userEmail");
 
     if (!email) {
       router.push("/login");
-    } else {
+      return;
+    }
+
+    // Utiliser setTimeout pour éviter setState synchrone dans l'effet
+    const timer = setTimeout(() => {
       setUserEmail(email);
       setLoading(false);
-    }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [router]);
 
   const handleLogout = () => {

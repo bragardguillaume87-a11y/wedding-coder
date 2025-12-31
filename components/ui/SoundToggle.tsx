@@ -15,8 +15,12 @@ export default function SoundToggle() {
 
   useEffect(() => {
     // Récupérer l'état initial depuis le soundManager
-    setMuted(soundManager.isMuted());
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMuted(soundManager.isMuted());
+      setMounted(true);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleToggle = () => {

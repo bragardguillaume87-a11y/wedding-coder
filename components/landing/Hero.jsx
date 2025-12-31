@@ -2,30 +2,12 @@
 
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import Image from 'next/image';
+import { heroContainerVariants, heroItemVariants } from '@/lib/animations';
+import { heroData } from '@/config/landingData';
 
 export default function Hero() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.3,
-        delayChildren: 0.4,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 1, ease: 'easeOut' },
-    },
-  };
-
   return (
     <section className="min-h-screen bg-gradient-to-b from-[var(--cream)] to-white flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Arrière-plan décoratif chaleureux */}
@@ -36,19 +18,19 @@ export default function Hero() {
 
       <motion.div
         className="relative z-10 text-center max-w-4xl mx-auto"
-        variants={containerVariants}
+        variants={heroContainerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Badge */}
-        <motion.div variants={itemVariants} className="mb-6">
-          <span className="inline-block px-4 py-2 bg-[var(--rose-powder)] bg-opacity-30 text-[var(--terracotta)] rounded-full text-sm font-semibold mb-4">
-            💍 Été 2026
-          </span>
+        <motion.div variants={heroItemVariants} className="mb-6">
+          <Badge className="bg-[var(--rose-powder)] bg-opacity-30 text-[var(--terracotta)] border-transparent text-sm mb-4">
+            {heroData.badge}
+          </Badge>
         </motion.div>
 
         {/* Photo du couple - Placeholder pour l'instant */}
-        <motion.div variants={itemVariants} className="mb-8 flex justify-center">
+        <motion.div variants={heroItemVariants} className="mb-8 flex justify-center">
           <div className="w-40 h-40 rounded-full bg-gradient-to-br from-[var(--terracotta)] to-[var(--rose-powder)] flex items-center justify-center shadow-lg">
             <span className="text-white text-5xl">👰🤵</span>
           </div>
@@ -56,49 +38,49 @@ export default function Hero() {
 
         {/* Titre principal avec font serif */}
         <motion.h1
-          variants={itemVariants}
+          variants={heroItemVariants}
           className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[var(--charcoal)] mb-6"
           style={{ fontFamily: 'var(--font-crimson-pro)' }}
         >
-          Guillaume & [Nom]
+          {heroData.title.couple}
           <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[var(--terracotta)] to-[var(--rose-powder)] mt-2">
-            se marient
+            {heroData.title.action}
           </span>
         </motion.h1>
 
         {/* Sous-titre poétique */}
         <motion.p
-          variants={itemVariants}
+          variants={heroItemVariants}
           className="text-xl sm:text-2xl text-[var(--charcoal)] opacity-80 mb-6 leading-relaxed"
         >
-          Plutôt que de vous faire venir à nous,
+          {heroData.subtitle[0]}
           <br />
-          nous viendrons à vous.
+          {heroData.subtitle[1]}
         </motion.p>
 
         <motion.p
-          variants={itemVariants}
+          variants={heroItemVariants}
           className="text-lg sm:text-xl text-[var(--charcoal)] opacity-70 mb-8 leading-relaxed max-w-2xl mx-auto"
         >
-          En tenue de cérémonie, avec nos rires et nos maladresses,
+          {heroData.description[0]}
           <br />
-          pour célébrer l&apos;amour dans vos salons, vos jardins, vos cuisines.
+          {heroData.description[1]}
         </motion.p>
 
         {/* Paragraphe explicatif */}
         <motion.p
-          variants={itemVariants}
+          variants={heroItemVariants}
           className="text-base text-[var(--charcoal)] opacity-60 mb-12 max-w-2xl mx-auto italic"
         >
-          Un mariage itinérant à travers villes et pays,
+          {heroData.explanation[0]}
           <br />
-          pour que personne ne reste dehors,
+          {heroData.explanation[1]}
           <br />
-          et que chaque moment soit vraiment partagé.
+          {heroData.explanation[2]}
         </motion.p>
 
         {/* Boutons CTA */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
+        <motion.div variants={heroItemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/login">
             <Button
               size="lg"
@@ -118,15 +100,10 @@ export default function Hero() {
 
         {/* Statistiques personnelles */}
         <motion.div
-          variants={itemVariants}
+          variants={heroItemVariants}
           className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-16 pt-16 border-t border-[var(--beige)]"
         >
-          {[
-            { number: '12', label: 'villes' },
-            { number: '3', label: 'pays' },
-            { number: '1', label: 'promesse' },
-            { number: '∞', label: 'souvenirs' },
-          ].map((stat, idx) => (
+          {heroData.stats.map((stat, idx) => (
             <div key={idx} className="text-center">
               <div className="text-3xl sm:text-4xl font-bold text-[var(--terracotta)] mb-2" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
                 {stat.number}

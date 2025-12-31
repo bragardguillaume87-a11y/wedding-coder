@@ -46,10 +46,11 @@ export async function POST(request: Request) {
       { status: 200 }
     );
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('❌ Erreur login:', err);
+    const message = err instanceof Error ? err.message : 'Erreur serveur';
     return NextResponse.json(
-      { error: err?.message ?? 'Erreur serveur' },
+      { error: message },
       { status: 500 }
     );
   }

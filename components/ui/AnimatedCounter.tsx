@@ -6,7 +6,7 @@
 
 'use client';
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
+import { motion, useMotionValue, animate } from 'framer-motion';
 import { soundManager } from '@/lib/soundManager';
 
 interface AnimatedCounterProps {
@@ -26,14 +26,13 @@ export default function AnimatedCounter({
 }: AnimatedCounterProps) {
   const [hasAnimated, setHasAnimated] = useState(false);
   const count = useMotionValue(0);
-  const rounded = useTransform(count, (latest) => Math.round(latest));
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
     // Ne pas réanimer si déjà fait
     if (hasAnimated || value === 0) {
-      setDisplayValue(value);
-      return;
+      const initTimer = setTimeout(() => setDisplayValue(value), 0);
+      return () => clearTimeout(initTimer);
     }
 
     const timer = setTimeout(() => {

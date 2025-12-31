@@ -43,7 +43,6 @@ export async function POST(request: Request) {
     }
 
     const authUserId = authData.user.id;
-    console.log('✅ User Auth créé:', authUserId);
 
     // 2️⃣ Insérer dans public.users
     const { error: insertError } = await supabaseAdmin
@@ -75,8 +74,6 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('✅ User créé partout:', authUserId);
-
     // Succès!
     return NextResponse.json(
       { 
@@ -86,10 +83,11 @@ export async function POST(request: Request) {
       { status: 201 }
     );
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('❌ Erreur inattendue:', err);
+    const message = err instanceof Error ? err.message : 'Erreur serveur';
     return NextResponse.json(
-      { error: err?.message ?? 'Erreur serveur' },
+      { error: message },
       { status: 500 }
     );
   }

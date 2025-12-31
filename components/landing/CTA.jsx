@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { ctaData } from '@/config/landingData';
 
 export default function JoinOurStory() {
   return (
@@ -20,16 +22,17 @@ export default function JoinOurStory() {
           transition={{ duration: 0.8 }}
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6" style={{ fontFamily: 'var(--font-crimson-pro)' }}>
-            Venez faire partie de notre histoire
+            {ctaData.title}
           </h2>
+
           <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-2xl p-8 mb-8 border border-white border-opacity-20">
             <p className="text-xl md:text-2xl text-white leading-relaxed mb-6">
-              Ce mariage itinérant, c&apos;est notre façon de dire :
+              {ctaData.message.main}
               <br />
-              <span className="font-bold">vous comptez. Chacun. Vraiment.</span>
+              <span className="font-bold">{ctaData.message.highlight}</span>
             </p>
             <p className="text-lg text-white opacity-90 leading-relaxed">
-              Alors ouvrez-nous votre porte, et faites partie de l&apos;aventure.
+              {ctaData.message.closing}
             </p>
           </div>
 
@@ -40,26 +43,25 @@ export default function JoinOurStory() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Link href="/login">
-              <motion.button
-                className="bg-white text-[var(--terracotta)] font-semibold py-4 px-8 rounded-lg text-lg hover:bg-opacity-90 transition-all shadow-xl"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <Link href={ctaData.buttons.primary.link}>
+              <Button
+                size="lg"
+                className="bg-white text-[var(--terracotta)] font-semibold shadow-xl hover:bg-opacity-90 transition-all"
                 style={{ fontFamily: 'var(--font-crimson-pro)' }}
               >
-                Confirmer ma présence
-              </motion.button>
+                {ctaData.buttons.primary.text}
+              </Button>
             </Link>
-            <motion.button
-              className="border-2 border-white text-white font-semibold py-4 px-8 rounded-lg text-lg hover:bg-white hover:bg-opacity-10 transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all"
+              onClick={() => window.location.href = ctaData.buttons.secondary.link}
             >
-              Questions fréquentes
-            </motion.button>
+              {ctaData.buttons.secondary.text}
+            </Button>
           </motion.div>
 
-          {/* Petite touche d'humour */}
           <motion.p
             className="mt-8 text-white opacity-70 italic text-sm"
             initial={{ opacity: 0 }}
@@ -67,7 +69,7 @@ export default function JoinOurStory() {
             viewport={{ once: true }}
             transition={{ duration: 1, delay: 0.5 }}
           >
-            (Préparez le café, on arrive. Et peut-être des mouchoirs, on ne promet rien.)
+            {ctaData.footnote}
           </motion.p>
         </motion.div>
       </div>

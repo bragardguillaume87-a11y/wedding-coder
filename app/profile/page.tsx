@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
@@ -27,20 +27,7 @@ export default function ProfilePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  // Cleanup pour les timeouts
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     setLoading(true);
     setError("");
 
@@ -76,13 +63,18 @@ export default function ProfilePage() {
       setProfile(row);
       setNewName(row.full_name || "");
       console.log("✅ Profil chargé:", row);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ Erreur:", err);
-      setError(err.message || "Erreur inconnue");
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleSaveProfile = async () => {
     if (!profile) return;
@@ -106,17 +98,16 @@ export default function ProfilePage() {
       }
 
       setMessage("✅ Profil mis à jour avec succès!");
-      console.log("✅ Profil mis à jour");
 
       // Recharge le profil pour afficher les nouvelles données
       await loadProfile();
 
-      // Cache le message après 3 secondes (avec cleanup automatique via useEffect)
-      const timeoutId = setTimeout(() => setMessage(""), 3000);
-      // Le cleanup sera géré par le useEffect global
-    } catch (err: any) {
+      // Cache le message après 3 secondes
+      setTimeout(() => setMessage(""), 3000);
+    } catch (err: unknown) {
       console.error("❌ Erreur:", err);
-      setError(err.message || "Erreur inconnue");
+      const message = err instanceof Error ? err.message : "Erreur inconnue";
+      setError(message);
     }
   };
 

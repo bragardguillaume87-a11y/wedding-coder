@@ -1,10 +1,10 @@
 /**
  * Page de la carte interactive du parcours de mariage
- * Affiche tous les événements sur une carte Leaflet avec animations gaming
+ * Affiche tous les événements sur une carte MapTiler avec animations gaming
  */
 
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { createClient } from '@supabase/supabase-js';
@@ -12,12 +12,15 @@ import { sortEventsByDate, calculateCenter, calculateTotalDistance, FRANCE_CENTE
 import type { MapEvent } from '@/lib/mapHelpers';
 import { motion } from 'framer-motion';
 
-// Dynamic imports pour Leaflet (incompatible avec SSR)
+// Dynamic imports pour MapTiler (incompatible avec SSR)
 const BaseMap = dynamic(() => import('@/components/map/BaseMap'), { ssr: false });
 const GamingMarker = dynamic(() => import('@/components/map/GamingMarker'), { ssr: false });
 const JourneyPath = dynamic(() => import('@/components/map/JourneyPath'), { ssr: false });
 const SoundToggle = dynamic(() => import('@/components/ui/SoundToggle'), { ssr: false });
 const AnimatedCounter = dynamic(() => import('@/components/ui/AnimatedCounter'), { ssr: false });
+
+// Import des filtres (chargement immédiat car petit composant)
+import { EventFilters } from '@/components/events/EventFilters';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,13 +30,11 @@ const supabase = createClient(
 export default function JourneyMapPage() {
   const router = useRouter();
   const [events, setEvents] = useState<MapEvent[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<MapEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false); // Filtres masqués par défaut
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     // Vérifier l'authentification
     const userEmail = localStorage.getItem('userEmail');
     if (!userEmail) {
@@ -52,14 +53,22 @@ export default function JourneyMapPage() {
 
       if (error) throw error;
 
-      setEvents(data || []);
-      console.log(`✅ ${data?.length || 0} événement(s) chargé(s)`);
+      const validData = (data || []).filter(
+        (e) => e.latitude != null && e.longitude != null && !isNaN(e.latitude) && !isNaN(e.longitude)
+      );
+
+      setEvents(validData);
+      setFilteredEvents(validData); // Initialiser directement
     } catch (error) {
       console.error('❌ Erreur chargement événements:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
 
   // État de chargement
   if (loading) {
@@ -84,8 +93,11 @@ export default function JourneyMapPage() {
     (e) => e.latitude != null && e.longitude != null && !isNaN(e.latitude) && !isNaN(e.longitude)
   );
 
-  const sortedEvents = sortEventsByDate(validEvents);
-  const mapCenter = validEvents.length > 0 ? calculateCenter(validEvents) : FRANCE_CENTER;
+  // Utiliser les événements filtrés pour l'affichage
+  const eventsToDisplay = filteredEvents;
+
+  const sortedEvents = sortEventsByDate(eventsToDisplay);
+  const mapCenter = eventsToDisplay.length > 0 ? calculateCenter(eventsToDisplay) : FRANCE_CENTER;
   const positions: [number, number][] = sortedEvents.map((e) => [e.latitude, e.longitude]);
   const totalDistance = calculateTotalDistance(sortedEvents);
 
@@ -116,7 +128,7 @@ export default function JourneyMapPage() {
                   Carte du Parcours
                 </h1>
                 <p className="text-lg text-[var(--charcoal)] opacity-70 mt-1">
-                  {validEvents.length} étape{validEvents.length > 1 ? 's' : ''}
+                  {eventsToDisplay.length} / {validEvents.length} étape{validEvents.length > 1 ? 's' : ''}
                   {totalDistance > 0 && (
                     <>
                       {' • '}
@@ -126,8 +138,8 @@ export default function JourneyMapPage() {
                         delay={
                           // Démarrer après que tous les waypoints soient apparus
                           400 + // Délai initial ligne
-                          (validEvents.length - 2) * 300 + // Durée ligne
-                          validEvents.length * 200 + // Tous les waypoints
+                          (eventsToDisplay.length - 2) * 300 + // Durée ligne
+                          eventsToDisplay.length * 200 + // Tous les waypoints
                           300 // Petit délai supplémentaire
                         }
                         suffix=" km au total"
@@ -139,6 +151,44 @@ export default function JourneyMapPage() {
             </div>
           </div>
         </motion.header>
+
+        {/* Bouton toggle filtres */}
+        {validEvents.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6"
+          >
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-beige
+                       rounded-lg hover:border-terracotta transition-all text-charcoal font-medium"
+            >
+              <span className="text-xl">{showFilters ? '🔽' : '▶️'}</span>
+              <span>Filtres</span>
+              <span className="text-sm opacity-60">
+                ({eventsToDisplay.length}/{validEvents.length} événements)
+              </span>
+            </button>
+
+            {/* Filtres collapsibles */}
+            {showFilters && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden mt-4"
+              >
+                <EventFilters
+                  events={validEvents}
+                  onFilterChange={setFilteredEvents}
+                />
+              </motion.div>
+            )}
+          </motion.div>
+        )}
 
         {/* État vide */}
         {validEvents.length === 0 ? (

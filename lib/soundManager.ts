@@ -83,7 +83,6 @@ class SoundManager {
     this.muted = savedMute === 'true';
 
     this.initialized = true;
-    console.log('🔊 Sound Manager initialized');
   }
 
   /**
@@ -128,7 +127,6 @@ class SoundManager {
       this.sounds.forEach(sound => sound.stop());
     }
 
-    console.log(`🔊 Sounds ${this.muted ? 'muted' : 'unmuted'}`);
     return this.muted;
   }
 
